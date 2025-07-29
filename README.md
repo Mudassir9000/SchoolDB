@@ -18,3 +18,11 @@ Python 3
 JSON for data storage
 
 File I/O
+
+✅ Standard Library Modules Used
+Module	Purpose
+json	To read from and write to JSON files
+os	To check if the JSON file exists
+
+# No external dependencies required
+# Requires Python 3.x
