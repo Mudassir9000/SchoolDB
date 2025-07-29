@@ -1,0 +1,26 @@
+[
+    {
+        "id": "001",
+        "name": "Anas",
+        "age": 15,
+        "grade": "10"
+    },
+    {
+        "id": "002",
+        "name": "Sana",
+        "age": 15,
+        "grade": "10th"
+    },
+    {
+        "id": "003",
+        "name": "Akhlaq",
+        "age": 13,
+        "grade": "8th"
+    },
+    {
+        "id": "005",
+        "name": "kaka",
+        "age": 26,
+        "grade": "c"
+    }
+]
