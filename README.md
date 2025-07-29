@@ -1,3 +1,5 @@
+#SCHOOL DATABASE
+
 This is a simple command-line-based Student Management System written in Python. It allows users to perform basic CRUD operations (Create, Read, Update, Delete) on student records, which are stored in a JSON file.
 
 📁 Features
