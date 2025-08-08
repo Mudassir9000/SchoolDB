@@ -1,5 +1,6 @@
 import json
 import os
+from pymongo import MongoClient
 
 class Student:
     def __init__(self, student_id, name, age, grade):
@@ -18,6 +19,10 @@ class SchoolDatabase:
     def __init__(self, filename="school_db.json"):
         self.filename = filename
         self.students = self._load_students()
+        # MongoDB setup
+        self.mongo_client = MongoClient("mongodb://localhost:27017/")
+        self.mongo_db = self.mongo_client["school"]
+        self.mongo_collection = self.mongo_db["students"]
 
     def _load_students(self):
         if os.path.exists(self.filename):
@@ -27,17 +32,26 @@ class SchoolDatabase:
             return []
 
     def append_student(self, student):
-        self.students.append(student.to_dict())
+        student_dict = student.to_dict()
+        self.students.append(student_dict)
         with open(self.filename, "w") as file:
             json.dump(self.students, file, indent=4)
+        # MongoDB insert
+        self.mongo_collection.insert_one(student_dict)
 
     def get_student(self, student_id):
         for student in self.students:
             if student["id"] == student_id:
                 return student
+        # Try MongoDB if not found in local
+        mongo_student = self.mongo_collection.find_one({"id": student_id})
+        if mongo_student:
+            mongo_student.pop("_id", None)
+            return mongo_student
         return None
 
     def update_student(self, student_id, name=None, age=None, grade=None):
+        updated = False
         for student in self.students:
             if student["id"] == student_id:
                 if name is not None:
@@ -48,17 +62,36 @@ class SchoolDatabase:
                     student["grade"] = grade
                 with open(self.filename, "w") as file:
                     json.dump(self.students, file, indent=4)
-                return True
-        return False
+                updated = True
+                break
+        # MongoDB update
+        update_fields = {}
+        if name is not None:
+            update_fields["name"] = name
+        if age is not None:
+            update_fields["age"] = age
+        if grade is not None:
+            update_fields["grade"] = grade
+        if update_fields:
+            result = self.mongo_collection.update_one({"id": student_id}, {"$set": update_fields})
+            if result.modified_count > 0:
+                updated = True
+        return updated
 
     def delete_student(self, student_id):
+        deleted = False
         for i, student in enumerate(self.students):
             if student["id"] == student_id:
                 del self.students[i]
                 with open(self.filename, "w") as file:
                     json.dump(self.students, file, indent=4)
-                return True
-        return False
+                deleted = True
+                break
+        # MongoDB delete
+        result = self.mongo_collection.delete_one({"id": student_id})
+        if result.deleted_count > 0:
+            deleted = True
+        return deleted
 
     def call_student(self, student_id):
         student = self.get_student(student_id)
